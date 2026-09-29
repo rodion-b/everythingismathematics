@@ -183,7 +183,10 @@
 
     <div class="facts">
       <article class="fact art-cloud">
-        <div class="fact-art"><svg data-art="sunflower" viewBox="-100 -100 200 200" role="img" aria-label="A sunflower with its seeds arranged in spirals"></svg></div>
+        <div class="fact-art">
+          <button type="button" class="toy" data-toy="sunflower" aria-label="Sunflower: press to colour in its spirals"><svg viewBox="-100 -100 200 200" aria-hidden="true"></svg></button>
+          <p class="toy-note" aria-live="polite">tap to find the spirals</p>
+        </div>
         <div class="fact-body">
           <h3>Sunflowers grow in spirals</h3>
           <p>The seeds in a sunflower sit in spirals. Count them and you’ll often find 34 turning one way and 55 the other. Both are Fibonacci numbers: 1, 1, 2, 3, 5, 8, 13, 21, 34, 55… Each one is the two before it added together.</p>
@@ -192,7 +195,10 @@
       </article>
 
       <article class="fact art-honey">
-        <div class="fact-art"><svg class="fill" data-art="honeycomb" viewBox="0 0 200 125" preserveAspectRatio="xMidYMid slice" role="img" aria-label="Honeycomb made of hexagons"></svg></div>
+        <div class="fact-art">
+          <button type="button" class="toy" data-toy="honeycomb" aria-label="Honeycomb: press to count the hexagons"><svg class="fill" viewBox="0 0 200 125" preserveAspectRatio="xMidYMid slice" aria-hidden="true"></svg></button>
+          <p class="toy-note" aria-live="polite">tap the hexagons to count them</p>
+        </div>
         <div class="fact-body">
           <h3>Bees build with hexagons</h3>
           <p>A hexagon has six sides, and hexagons fit together with no gaps in between. That lets bees store the most honey while using the least wax.</p>
@@ -202,15 +208,18 @@
 
       <article class="fact art-mint">
         <div class="fact-art">
-          <svg viewBox="-100 -80 200 160" role="img" aria-label="A butterfly with a dashed line of symmetry down the middle">
-            <defs><g id="wing"><path d="M3-6C16-58 70-74 86-46c12 22-8 44-36 46C30 1 12-1 3-6Z" fill="#6e6abe"/><path d="M3 4c22-2 52 4 58 26 5 20-12 36-30 30C16 54 6 30 3 4Z" fill="#ffc2dc"/><circle cx="56" cy="-32" r="10" fill="#fec425"/><circle cx="32" cy="30" r="7" fill="#b85a9d"/></g></defs>
-            <g stroke="#27215a" stroke-width="3" stroke-linejoin="round">
-              <use href="#wing"/><use href="#wing" transform="scale(-1 1)"/>
-              <ellipse cy="2" rx="5" ry="34" fill="#27215a"/>
-              <path d="M-2-30C-8-46-16-56-24-60M2-30C8-46 16-56 24-60" fill="none" stroke-linecap="round"/>
-            </g>
-            <line x1="0" y1="-76" x2="0" y2="76" stroke="#fff" stroke-width="4" stroke-dasharray="7 7" stroke-linecap="round"/>
-          </svg>
+          <button type="button" class="toy" data-toy="butterfly" aria-label="Butterfly: press to give it new colours">
+            <svg viewBox="-100 -80 200 160" aria-hidden="true">
+              <defs><g id="wing"><path class="wing-top" d="M3-6C16-58 70-74 86-46c12 22-8 44-36 46C30 1 12-1 3-6Z" fill="#6e6abe"/><path class="wing-bottom" d="M3 4c22-2 52 4 58 26 5 20-12 36-30 30C16 54 6 30 3 4Z" fill="#ffc2dc"/><circle class="spot-top" cx="56" cy="-32" r="10" fill="#fec425"/><circle class="spot-bottom" cx="32" cy="30" r="7" fill="#b85a9d"/></g></defs>
+              <g stroke="#27215a" stroke-width="3" stroke-linejoin="round">
+                <g class="wing-r"><use href="#wing"/></g><g class="wing-l"><use href="#wing" transform="scale(-1 1)"/></g>
+                <ellipse cy="2" rx="5" ry="34" fill="#27215a"/>
+                <path d="M-2-30C-8-46-16-56-24-60M2-30C8-46 16-56 24-60" fill="none" stroke-linecap="round"/>
+              </g>
+              <line x1="0" y1="-76" x2="0" y2="76" stroke="#fff" stroke-width="4" stroke-dasharray="7 7" stroke-linecap="round"/>
+            </svg>
+          </button>
+          <p class="toy-note" aria-live="polite">tap to change its colours</p>
         </div>
         <div class="fact-body">
           <h3>Butterflies are symmetrical</h3>
@@ -221,13 +230,18 @@
 
       <article class="fact art-violet">
         <div class="fact-art">
-          <svg viewBox="-100 -100 200 200" role="img" aria-label="A snowflake with six arms">
-            <defs><path id="arm" d="M0 0V-78M0-30-17-46M0-30 17-46M0-54-13-66M0-54 13-66M0-78-7-86M0-78 7-86"/></defs>
-            <g fill="none" stroke="#fff" stroke-width="7" stroke-linecap="round" stroke-linejoin="round">
-              <use href="#arm"/><use href="#arm" transform="rotate(60)"/><use href="#arm" transform="rotate(120)"/><use href="#arm" transform="rotate(180)"/><use href="#arm" transform="rotate(240)"/><use href="#arm" transform="rotate(300)"/>
-            </g>
-            <polygon points="14,0 7,12.1 -7,12.1 -14,0 -7,-12.1 7,-12.1" fill="#fec425" stroke="#fff" stroke-width="4" stroke-linejoin="round"/>
-          </svg>
+          <button type="button" class="toy" data-toy="snowflake" aria-label="Snowflake: press to turn it">
+            <svg viewBox="-100 -100 200 200" aria-hidden="true">
+              <defs><path id="arm" d="M0 0V-78M0-30-17-46M0-30 17-46M0-54-13-66M0-54 13-66M0-78-7-86M0-78 7-86"/></defs>
+              <g class="flake">
+                <g fill="none" stroke="#fff" stroke-width="7" stroke-linecap="round" stroke-linejoin="round">
+                  <use href="#arm"/><use href="#arm" transform="rotate(60)"/><use href="#arm" transform="rotate(120)"/><use href="#arm" transform="rotate(180)"/><use href="#arm" transform="rotate(240)"/><use href="#arm" transform="rotate(300)"/>
+                </g>
+                <polygon points="14,0 7,12.1 -7,12.1 -14,0 -7,-12.1 7,-12.1" fill="#fec425" stroke="#fff" stroke-width="4" stroke-linejoin="round"/>
+              </g>
+            </svg>
+          </button>
+          <p class="toy-note" aria-live="polite">tap to turn it</p>
         </div>
         <div class="fact-body">
           <h3>Snowflakes have six arms</h3>
@@ -237,7 +251,10 @@
       </article>
 
       <article class="fact art-pink">
-        <div class="fact-art"><svg data-art="pizza" viewBox="-100 -100 200 200" role="img" aria-label="A pizza cut into 8 slices, with 2 slices eaten"></svg></div>
+        <div class="fact-art">
+          <button type="button" class="toy" data-toy="pizza" aria-label="Pizza cut into 8 slices: press a slice to eat it"><svg viewBox="-100 -100 200 200" aria-hidden="true"></svg></button>
+          <p class="toy-note" aria-live="polite">tap a slice to eat it</p>
+        </div>
         <div class="fact-body">
           <h3>Pizza is made of fractions</h3>
           <p>Cut a pizza into 8 equal slices and each slice is one eighth. Eat 2 slices and you’ve eaten two eighths, which is the same as one quarter.</p>
@@ -246,7 +263,10 @@
       </article>
 
       <article class="fact art-sun">
-        <div class="fact-art"><svg data-art="clock" viewBox="-100 -100 200 200" role="img" aria-label="A clock face"></svg></div>
+        <div class="fact-art">
+          <button type="button" class="toy" data-toy="clock" aria-label="Clock: press to move the time on 5 minutes"><svg viewBox="-100 -100 200 200" aria-hidden="true"></svg></button>
+          <p class="toy-note" aria-live="polite">tap to move the time on</p>
+        </div>
         <div class="fact-body">
           <h3>Clocks count in sixties</h3>
           <p>There are 60 seconds in a minute and 60 minutes in an hour. That idea comes from the Babylonians, who counted in sixties about 4,000 years ago.</p>

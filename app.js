@@ -449,20 +449,58 @@
   const PRAISE = ["Brilliant!", "Yes!", "Spot on!", "Fantastic!", "You got it!", "Super!", "Wonderful!", "Nailed it!"];
   const RETRY = ["Not quite.", "Nearly!", "Have another look.", "Ooh, close!"];
 
-  /* ---------- Drawings for "Maths is hiding everywhere" ---------- */
+  /* ---------- "Maths is hiding everywhere": pictures you can press ---------- */
 
-  const ART = {
-    // Seeds placed by the golden angle, which is how real sunflowers pack them.
-    sunflower() {
+  const HOUR_WORDS = ["twelve", "one", "two", "three", "four", "five", "six", "seven", "eight", "nine", "ten", "eleven", "twelve"];
+  const MINUTE_WORDS = { 5: "five", 10: "ten", 20: "twenty", 25: "twenty-five" };
+
+  // Minutes since midnight (always a multiple of 5 here) as "10:15 is quarter past ten."
+  function timeInWords(total) {
+    const h = Math.floor(total / 60) % 12 || 12;
+    const m = total % 60;
+    const next = (h % 12) + 1;
+    const said = m === 0 ? `${HOUR_WORDS[h]} o’clock`
+      : m === 15 ? `quarter past ${HOUR_WORDS[h]}`
+      : m === 30 ? `half past ${HOUR_WORDS[h]}`
+      : m === 45 ? `quarter to ${HOUR_WORDS[next]}`
+      : m < 30 ? `${MINUTE_WORDS[m]} past ${HOUR_WORDS[h]}`
+      : `${MINUTE_WORDS[60 - m]} to ${HOUR_WORDS[next]}`;
+    return `${h}:${String(m).padStart(2, "0")} is ${said}.`;
+  }
+
+  // Each toy draws into (or finds) its picture and returns press(target), which reacts to a tap and returns
+  // the line to show underneath. target is the tapped part of the picture, or null for a keyboard press.
+  const TOYS = {
+    // Seeds placed by the golden angle, which is how real sunflowers pack them. That packing makes the spirals:
+    // in this drawing every 21st seed lines up one way and every 34th the other, and both are Fibonacci numbers.
+    sunflower(svg) {
       const petals = Array.from({ length: 24 }, (_, i) => `<ellipse cy="-66" rx="11" ry="26" transform="rotate(${i * 15})"/>`).join("");
       const seeds = Array.from({ length: 220 }, (_, i) => {
         const r = 3.3 * Math.sqrt(i + 1);
         const t = (i + 1) * 2.39996;
-        return `<circle cx="${(r * Math.cos(t)).toFixed(2)}" cy="${(r * Math.sin(t)).toFixed(2)}" r="${(1.4 + r / 40).toFixed(2)}"/>`;
+        return `<circle class="seed" cx="${(r * Math.cos(t)).toFixed(2)}" cy="${(r * Math.sin(t)).toFixed(2)}" r="${(1.4 + r / 40).toFixed(2)}"/>`;
       }).join("");
-      return `<g fill="${C.yellow}" stroke="${C.ink}" stroke-width="2">${petals}</g><circle r="52" fill="${C.tealDeep}" stroke="${C.ink}" stroke-width="2.5"/><g fill="${C.yellowLight}">${seeds}</g>`;
+      svg.innerHTML = `<g fill="${C.yellow}" stroke="${C.ink}" stroke-width="2">${petals}</g><circle r="52" fill="${C.tealDeep}" stroke="${C.ink}" stroke-width="2.5"/><g fill="${C.yellowLight}">${seeds}</g>`;
+      const dots = [...svg.querySelectorAll(".seed")];
+      // Neighbouring spirals are 13 (or 21) seeds apart, so these colour cycles never put two alike side by side.
+      const looks = [
+        { note: "21 and 34 are Fibonacci numbers! Tap again.", paint: () => null },
+        { note: "21 spirals curl this way…", paint: (n) => [C.yellowLight, C.pink, C.mint][(n % 21) % 3] },
+        { note: "…and 34 spirals curl the other way!", paint: (n) => [C.yellowLight, C.pink][(n % 34) % 2] },
+      ];
+      let look = 0;
+      return () => {
+        look = (look + 1) % looks.length;
+        dots.forEach((dot, i) => {
+          const fill = looks[look].paint(i + 1);
+          if (fill) dot.setAttribute("fill", fill);
+          else dot.removeAttribute("fill");
+        });
+        return looks[look].note;
+      };
     },
-    honeycomb() {
+
+    honeycomb(svg) {
       const r = 24;
       const w = Math.sqrt(3) * r;
       const fills = [C.yellow, C.yellowLight, C.yellow, "#fff3c4"];
@@ -471,22 +509,91 @@
         for (let col = -1; col < 6; col++) {
           const cx = col * w + (row % 2 ? w / 2 : 0);
           const cy = row * r * 1.5;
-          cells += `<polygon points="${polygon(6, r - 1.5, cx, cy)}" fill="${fills[(((row * 3 + col * 5) % 4) + 4) % 4]}"/>`;
+          cells += `<polygon class="cell" data-x="${cx.toFixed(1)}" data-y="${cy.toFixed(1)}" points="${polygon(6, r - 1.5, cx, cy)}" fill="${fills[(((row * 3 + col * 5) % 4) + 4) % 4]}"/>`;
         }
       }
-      return `<g stroke="${C.ink}" stroke-width="3" stroke-linejoin="round">${cells}</g>`;
+      svg.innerHTML = `<g stroke="${C.ink}" stroke-width="3" stroke-linejoin="round">${cells}</g><g class="cell-nums"></g>`;
+      const all = [...svg.querySelectorAll(".cell")];
+      const whole = all.filter((c) => c.dataset.x > 15 && c.dataset.x < 185 && c.dataset.y > 15 && c.dataset.y < 110);
+      const nums = svg.querySelector(".cell-nums");
+      const counted = [];
+      let note = "Tap the hexagons to count them.";
+      return (target) => {
+        const cell = target && target.closest(".cell");
+        if (cell && !whole.includes(cell)) return note; // cut off at the edge: its number wouldn't show
+        if (cell) {
+          const at = counted.indexOf(cell);
+          if (at >= 0) counted.splice(at, 1);
+          else counted.push(cell);
+        } else {
+          const next = whole.find((c) => !counted.includes(c));
+          if (next) counted.push(next);
+          else counted.length = 0;
+        }
+        all.forEach((c) => c.classList.toggle("counted", counted.includes(c)));
+        nums.innerHTML = counted.map((c, i) => `<text class="cell-num" x="${c.dataset.x}" y="${c.dataset.y}">${i + 1}</text>`).join("");
+        const n = counted.length;
+        note = !n ? "Tap the hexagons to count them."
+          : n === 1 ? "1 hexagon has 6 sides."
+          : `${n} hexagons have ${n} × 6 = ${n * 6} sides.`;
+        return note;
+      };
     },
-    pizza() {
+
+    // Both wings are drawn from one shape, mirrored, so new colours always land on both sides alike.
+    butterfly(svg) {
+      const parts = ["wing-top", "wing-bottom", "spot-top", "spot-bottom"].map((name) => svg.querySelector(`.${name}`));
+      const outfits = [
+        [C.violet, C.pink, C.yellow, C.orchid],
+        [C.orchid, C.yellow, C.pink, C.violet],
+        [C.teal, C.pink, C.yellow, C.orchid],
+        [C.yellow, C.violet, C.orchid, C.yellow],
+      ];
+      const notes = ["New colours, and both sides still match!", "Left and right are mirror images. That’s symmetry!"];
+      let turn = 0;
+      return () => {
+        turn++;
+        outfits[turn % outfits.length].forEach((fill, i) => parts[i].setAttribute("fill", fill));
+        return notes[(turn - 1) % notes.length];
+      };
+    },
+
+    snowflake(svg) {
+      const flake = svg.querySelector(".flake");
+      let turns = 0;
+      return () => {
+        turns++;
+        flake.style.transform = `rotate(${turns * 60}deg)`;
+        const sixths = turns % 6;
+        return sixths ? `${cap(fractionWords(sixths, 6))} of a turn, and it still looks the same!` : "A whole turn: back where it started!";
+      };
+    },
+
+    pizza(svg) {
       let slices = "";
       for (let i = 0; i < 8; i++) {
-        if (i === 1 || i === 2) continue; // two slices already eaten
         const mid = rad(i * 45 + 22.5 - 90);
-        slices += `<path d="${wedge(0, 0, 82, i * 45, i * 45 + 45)}" fill="${C.yellowLight}"/>` +
-          `<circle cx="${(52 * Math.cos(mid)).toFixed(1)}" cy="${(52 * Math.sin(mid)).toFixed(1)}" r="9" fill="${C.orchid}"/>`;
+        slices += `<g class="slice"><path d="${wedge(0, 0, 82, i * 45, i * 45 + 45)}" fill="${C.yellowLight}"/>` +
+          `<circle cx="${(52 * Math.cos(mid)).toFixed(1)}" cy="${(52 * Math.sin(mid)).toFixed(1)}" r="9" fill="${C.orchid}"/></g>`;
       }
-      return `<circle r="92" fill="#fff" stroke="${C.ink}" stroke-width="3"/><circle r="82" fill="none" stroke="${C.ink}" stroke-width="2" stroke-dasharray="3 7" opacity=".35"/><g stroke="${C.ink}" stroke-width="3" stroke-linejoin="round">${slices}</g>`;
+      svg.innerHTML = `<circle r="92" fill="#fff" stroke="${C.ink}" stroke-width="3"/><circle r="82" fill="none" stroke="${C.ink}" stroke-width="2" stroke-dasharray="3 7" opacity=".35"/><g stroke="${C.ink}" stroke-width="3" stroke-linejoin="round">${slices}</g>`;
+      const all = [...svg.querySelectorAll(".slice")];
+      const same = { 2: " That’s the same as one quarter!", 4: " That’s the same as one half!", 6: " That’s the same as three quarters!" };
+      return (target) => {
+        const left = all.filter((s) => !s.classList.contains("eaten"));
+        if (!left.length) {
+          all.forEach((s) => s.classList.remove("eaten"));
+          return "A fresh pizza! Tap a slice to eat it.";
+        }
+        const tapped = target && target.closest(".slice");
+        (left.includes(tapped) ? tapped : left[0]).classList.add("eaten");
+        const eaten = 9 - left.length;
+        if (eaten === 8) return "Eight eighths: the whole pizza! Tap for another.";
+        return `You’ve eaten ${fractionWords(eaten, 8)}.${same[eaten] || ""}`;
+      };
     },
-    clock() {
+
+    clock(svg) {
       let ticks = "";
       for (let i = 0; i < 60; i++) {
         const five = i % 5 === 0;
@@ -496,15 +603,37 @@
         const t = rad(a - 90);
         return `<text class="clock-num" x="${(54 * Math.cos(t)).toFixed(1)}" y="${(54 * Math.sin(t)).toFixed(1)}">${n}</text>`;
       }).join("");
-      return `<circle r="90" fill="#fff" stroke="${C.ink}" stroke-width="5"/><g stroke="${C.ink}" stroke-linecap="round">${ticks}</g>${numbers}` +
-        `<g stroke-linecap="round"><line y2="-40" stroke="${C.ink}" stroke-width="8" transform="rotate(305)"/><line y2="-64" stroke="${C.orchid}" stroke-width="5" transform="rotate(60)"/></g>` +
+      svg.innerHTML = `<circle r="90" fill="#fff" stroke="${C.ink}" stroke-width="5"/><g stroke="${C.ink}" stroke-linecap="round">${ticks}</g>${numbers}` +
+        `<g stroke-linecap="round"><line class="hand hand-h" y2="-40" stroke="${C.ink}" stroke-width="8"/><line class="hand hand-m" y2="-64" stroke="${C.orchid}" stroke-width="5"/></g>` +
         `<circle r="7" fill="${C.yellow}" stroke="${C.ink}" stroke-width="3"/>`;
+      const hourHand = svg.querySelector(".hand-h");
+      const minuteHand = svg.querySelector(".hand-m");
+      let minutes = 10 * 60 + 10;
+      // The angles only ever grow, so the hands always sweep forwards.
+      const show = () => {
+        hourHand.style.transform = `rotate(${minutes / 2}deg)`;
+        minuteHand.style.transform = `rotate(${minutes * 6}deg)`;
+      };
+      show();
+      return () => {
+        minutes += 5;
+        show();
+        return timeInWords(minutes);
+      };
     },
   };
 
-  document.querySelectorAll("[data-art]").forEach((svg) => {
-    const draw = ART[svg.dataset.art];
-    if (draw) svg.innerHTML = draw();
+  document.querySelectorAll(".toy").forEach((btn) => {
+    const make = TOYS[btn.dataset.toy];
+    const note = btn.parentElement.querySelector(".toy-note");
+    if (!make || !note) return;
+    const press = make(btn.querySelector("svg"));
+    btn.addEventListener("click", (e) => {
+      note.textContent = press(e.target === btn ? null : e.target);
+      btn.classList.remove("tapped");
+      void btn.offsetWidth; // restart the bounce
+      btn.classList.add("tapped");
+    });
   });
 
   /* ---------- Header ---------- */
